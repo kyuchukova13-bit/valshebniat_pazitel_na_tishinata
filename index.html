@@ -47,11 +47,30 @@
             display: flex; justify-content: center; align-items: center;
         }
 
-        /* РЪЦЕ */
-        .arm { position: absolute; width: 90px; height: 130px; background: inherit; border-radius: 50px; opacity: 0; transition: 1.2s; z-index: 1; }
-        .arm-left { left: -40px; top: 35%; transform: rotate(-20deg); }
-        .arm-right { right: -40px; top: 35%; transform: rotate(20deg); }
+  /* РЪЦЕ - ВЕРСИЯ ОТ ШУМОМЕРА */
+#hero-wrap {
+    position: relative;
+    transition: all 4s ease-in-out; /* Плавна преход за целия герой */
+}
 
+/* РЪЦЕТЕ ОТ ШУМОМЕРА (Разлята форма и blur) */
+#hero-wrap { position: relative; transition: all 4s ease-in-out; }
+
+.arm {
+    position: absolute; width: 110px; height: 170px; background: inherit; 
+    border-radius: 50% 50% 40% 40% / 60% 60% 30% 30%;
+    opacity: 0; transition: all 1s ease; z-index: 2; filter: blur(4px);
+}
+.arm-left { left: -75px; top: 25%; transform: rotate(-25deg); }
+.arm-right { right: -75px; top: 25%; transform: rotate(25deg); }
+
+.yoga-active .arm { opacity: 0.7; }
+
+/* Анимации за движение на ръцете */
+.inhale .arm-left { transform: rotate(-80deg) translateY(-60px); }
+.inhale .arm-right { transform: rotate(80deg) translateY(-60px); }
+.exhale .arm-left { transform: rotate(20deg) translateY(60px); }
+.exhale .arm-right { transform: rotate(-10deg) translateY(60px); }
         /* ЛИЦЕ - ПЕРФЕКТНО ЦЕНТРИРАНЕ */
         .face { position: relative; width: 160px; height: 120px; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .eyes { display: flex; justify-content: center; gap: 35px; width: 100%; }
@@ -148,7 +167,7 @@
     <div id="breathing-track"><div id="breathing-fill"></div></div>
 
     <div id="main-stage">
-        <div id="blob">
+    <div id="hero-wrap"> <div id="blob">
             <div class="arm arm-left"></div>
             <div class="arm arm-right"></div>
             <div class="face">
@@ -159,8 +178,9 @@
                 <div class="mouth"></div>
             </div>
         </div>
-        <div id="status-msg">Пазителят очаква вашата тишина...</div>
     </div>
+    <div id="status-msg">Пазителят очаква вашата тишина...</div>
+</div>
 
     <button id="yoga-btn">🧘 ВРЕМЕ ЗА ЙОГА</button>
     <div id="author-tag">Създадено от: Дочка Кючукова</div>
@@ -231,34 +251,38 @@
         }
     };
 
-    function runYogaCycle() {
-        if (!isYogaMode || isDeepMeditation) return;
-        yogaCycles++;
-        if (yogaCycles > 3) {
-            isDeepMeditation = true;
-            stage.className = 'meditation';
-            breathTrack.style.opacity = '0';
-            msg.innerHTML = "✨ Вълшебна тишина... ✨<br><span style='font-size: 22px;'>Работете тихо и спокойно.</span>";
-            return;
-        }
+   function runYogaCycle() {
+    if (!isYogaMode || isDeepMeditation) return;
+    yogaCycles++;
 
-        msg.innerHTML = "Вдишай през носа... (" + yogaCycles + "/3)";
-        stage.classList.remove('exhale'); stage.classList.add('inhale');
-        blob.style.transform = "scale(1.25) translateY(-30px)";
-        breathFill.style.height = "100%";
-        breathFill.style.background = "#4facfe";
-
-        setTimeout(() => {
-            if (!isYogaMode || isDeepMeditation) return;
-            msg.innerHTML = "Издишай през устата... (" + yogaCycles + "/3)";
-            stage.classList.remove('inhale'); stage.classList.add('exhale');
-            blob.style.transform = "scale(0.85) translateY(20px)";
-            breathFill.style.height = "0%";
-            breathFill.style.background = "#00e676";
-        }, 6000);
-
-        setTimeout(runYogaCycle, 12500);
+    if (yogaCycles > 3) {
+        isDeepMeditation = true;
+        stage.className = 'meditation';
+        document.getElementById('hero-wrap').style.transform = "translateY(0) scale(1)";
+        breathTrack.style.opacity = '0';
+        msg.innerHTML = "✨ Вълшебна тишина... ✨";
+        return;
     }
+
+    const wrap = document.getElementById('hero-wrap');
+    
+    // ВДИШАЙ - Героят се надува и отива нагоре
+    msg.innerHTML = "Вдишай през носа... (" + yogaCycles + "/3)";
+    stage.classList.remove('exhale'); stage.classList.add('inhale');
+    wrap.style.transform = "translateY(-140px) scale(1.25)"; 
+    breathFill.style.height = "100%";
+
+    setTimeout(() => {
+        if (!isYogaMode || isDeepMeditation) return;
+        // ИЗДИШАЙ - Героят се свива и слиза надолу
+        msg.innerHTML = "Издишай през устата... (" + yogaCycles + "/3)";
+        stage.classList.remove('inhale'); stage.classList.add('exhale');
+        wrap.style.transform = "translateY(80px) scale(0.9)"; 
+        breathFill.style.height = "0%";
+    }, 6000);
+
+    setTimeout(runYogaCycle, 12500);
+}
 </script>
 </body>
 </html>
