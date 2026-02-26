@@ -16,19 +16,29 @@
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(5, 5, 16, 0.96); z-index: 1000;
             display: flex; justify-content: center; align-items: center;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px); transition: 0.5s;
         }
         #intro-card {
             background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             padding: 45px; border-radius: 45px; max-width: 750px;
             border: 3px solid #ffd319; box-shadow: 0 0 60px rgba(255, 211, 25, 0.4);
-            text-align: center;
+            text-align: center; position: relative;
         }
         #intro-card h1 { color: #ffd319; font-size: 2.8em; margin-bottom: 15px; text-shadow: 0 0 20px rgba(255,211,25,0.5); }
+        
         .mood-box { display: flex; justify-content: space-around; margin: 30px 0; gap: 15px; }
         .mood { padding: 15px; border-radius: 20px; font-size: 0.95em; width: 33%; border: 2px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); }
 
-        /* ВЕРТИКАЛНА ЛЕНТА */
+        #class-input {
+            width: 80%; padding: 15px; font-size: 20px; border-radius: 15px; border: 2px solid #4facfe;
+            background: rgba(255,255,255,0.1); color: white; text-align: center; margin-bottom: 20px;
+            outline: none; transition: 0.3s;
+        }
+        #class-input:focus { background: rgba(255,255,255,0.2); box-shadow: 0 0 15px #4facfe; }
+        #class-input::placeholder { color: rgba(255,255,255,0.5); }
+        .intro-author { margin-top: 25px; font-size: 14px; opacity: 0.7; font-style: italic; }
+
+        /* ВЕРТИКАЛНА ЛЕНТА ЗА ДИШАНЕ */
         #breathing-track {
             position: fixed; left: 45px; top: 15%; width: 18px; height: 70%;
             background: rgba(255,255,255,0.05); border-radius: 25px;
@@ -36,7 +46,42 @@
         }
         #breathing-fill { position: absolute; bottom: 0; width: 100%; height: 0%; background: #4facfe; transition: height 6s linear, background 1s; box-shadow: 0 0 20px #4facfe; }
 
-        /* ГЕРОЙ */
+        /* ПАНЕЛ ЗА ШУМА (вдясно) */
+        #sensitivity-control {
+            position: fixed; right: 30px; top: 10%; height: 80%;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            background: rgba(0, 0, 0, 0.5); padding: 25px 20px;
+            border-radius: 30px; border: 2px solid rgba(255,255,255,0.2); transition: 0.3s;
+        }
+        
+        /* Брояч на Гнева в панела */
+        #anger-tracker {
+            color: #ff0844; text-align: center; margin-bottom: 20px;
+            font-size: 18px; font-weight: bold; text-shadow: 0 0 10px rgba(255,8,68,0.5);
+        }
+        #anger-display { font-size: 50px; display: block; margin-top: 5px; }
+
+        #sensitivity-slider { 
+            appearance: none; width: 12px; height: 35vh; background: #4facfe; 
+            border-radius: 10px; outline: none; writing-mode: bt-lr; -webkit-appearance: slider-vertical; 
+            margin: 15px 0; cursor: pointer;
+        }
+        #sensitivity-slider::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 25px; height: 25px; background: #ffd319; border-radius: 50%; cursor: pointer;
+        }
+        .slider-label { font-size: 18px; margin-top: 5px; color: #4facfe; font-weight: bold; text-align: center; line-height: 1.2;}
+        .mic-label { color: #ff901f; font-size: 16px; margin-top: 20px; }
+        #current-vol { font-size: 35px; color: #ff0844; font-weight: bold; }
+
+        /* ГОРЕН БАР (Много по-едри букви за класа и звездите) */
+        #top-bar {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%); width: 90%;
+            display: none; justify-content: space-between; align-items: center; z-index: 100;
+        }
+        #class-display-name { font-size: 55px; font-weight: bold; color: #4facfe; text-shadow: 0 2px 15px rgba(79,172,254,0.6); }
+        #stars-container { font-size: 60px; letter-spacing: 5px; text-shadow: 0 0 20px rgba(255,211,25,0.8); }
+
+        /* ГЕРОЙ И СЦЕНА */
         #main-stage { display: flex; flex-direction: column; align-items: center; position: relative; }
         #blob {
             position: relative; width: 320px; height: 320px;
@@ -46,92 +91,74 @@
             animation: morph 8s ease-in-out infinite; transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex; justify-content: center; align-items: center;
         }
+        #hero-wrap { position: relative; transition: all 4s ease-in-out; }
 
-  /* РЪЦЕ - ВЕРСИЯ ОТ ШУМОМЕРА */
-#hero-wrap {
-    position: relative;
-    transition: all 4s ease-in-out; /* Плавна преход за целия герой */
-}
+        /* Виртуални слушалки */
+        .headphones { position: absolute; top: -20px; width: 100%; height: 100%; z-index: 20; opacity: 0; transition: 0.5s; pointer-events: none; }
+        .headband { position: absolute; top: 30px; left: 10%; width: 80%; height: 100px; border-radius: 50%; border: 15px solid #2c3e50; border-bottom: none; }
+        .earmuff { position: absolute; top: 100px; width: 60px; height: 100px; background: #34495e; border-radius: 30px; border: 5px solid #bdc3c7; }
+        .earmuff.left { left: -10px; }
+        .earmuff.right { right: -10px; }
+        .paused .headphones { opacity: 1; transform: translateY(10px); }
+        .paused #blob { background: linear-gradient(135deg, #7f8c8d 0%, #bdc3c7 100%); box-shadow: 0 0 50px rgba(255,255,255,0.2); }
+        .paused .eyes { opacity: 0.3; }
 
-/* РЪЦЕТЕ ОТ ШУМОМЕРА (Разлята форма и blur) */
-#hero-wrap { position: relative; transition: all 4s ease-in-out; }
-
-.arm {
-    position: absolute; width: 110px; height: 170px; background: inherit; 
-    border-radius: 50% 50% 40% 40% / 60% 60% 30% 30%;
-    opacity: 0; transition: all 1s ease; z-index: 2; filter: blur(4px);
-}
-.arm-left { left: -75px; top: 25%; transform: rotate(-25deg); }
-.arm-right { right: -75px; top: 25%; transform: rotate(25deg); }
-
-.yoga-active .arm { opacity: 0.7; }
-
-/* Анимации за движение на ръцете */
-.inhale .arm-left { transform: rotate(-80deg) translateY(-60px); }
-.inhale .arm-right { transform: rotate(80deg) translateY(-60px); }
-.exhale .arm-left { transform: rotate(20deg) translateY(60px); }
-.exhale .arm-right { transform: rotate(-10deg) translateY(60px); }
-        /* ЛИЦЕ - ПЕРФЕКТНО ЦЕНТРИРАНЕ */
-        .face { position: relative; width: 160px; height: 120px; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .eyes { display: flex; justify-content: center; gap: 35px; width: 100%; }
-        .eye { width: 42px; height: 50px; background: white; border-radius: 50%; position: relative; animation: blink 6.5s infinite; overflow: hidden; }
-        .pupil { 
-    width: 26px; 
-    height: 26px; 
-    background: #0f2027; 
-    border-radius: 50%; 
-    position: absolute; 
-    top: 12px; 
-    left: 8px; 
-    animation: lookAround 11s infinite; 
-}
-
-/* Това добавя малката бяла точка (блясъка) в окото */
-.pupil::after {
-    content: '';
-    position: absolute;
-    top: 4px;
-    left: 4px;
-    width: 8px;
-    height: 8px;
-    background: white;
-    border-radius: 50%;
-}
-        /* УСТАТА - ЦЕНТРИРАНА С TRANSFORMS */
-        .mouth { 
-            position: absolute; bottom: 5px; left: 50%;
-            width: 36px; height: 12px; 
-            border-bottom: 6px solid #0f2027; border-radius: 0 0 40px 40px;
-            transform: translateX(-50%); 
-            transition: all 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
+        /* Ръце и Лице */
+        .arm { position: absolute; width: 110px; height: 170px; background: inherit; border-radius: 50% 50% 40% 40% / 60% 60% 30% 30%; opacity: 0; transition: all 1s ease; z-index: 2; filter: blur(4px); }
+        .arm-left { left: -75px; top: 25%; transform: rotate(-25deg); }
+        .arm-right { right: -75px; top: 25%; transform: rotate(25deg); }
         
+        .yoga-active .arm { opacity: 0.7; }
+        .inhale .arm-left { transform: rotate(-80deg) translateY(-60px); }
+        .inhale .arm-right { transform: rotate(80deg) translateY(-60px); }
+        .exhale .arm-left { transform: rotate(20deg) translateY(60px); }
+        .exhale .arm-right { transform: rotate(-10deg) translateY(60px); }
+
+        .face { position: relative; width: 160px; height: 120px; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .eyes { display: flex; justify-content: center; gap: 35px; width: 100%; transition: 0.5s; }
+        .eye { width: 42px; height: 50px; background: white; border-radius: 50%; position: relative; animation: blink 6.5s infinite; overflow: hidden; }
+        .pupil { width: 26px; height: 26px; background: #0f2027; border-radius: 50%; position: absolute; top: 12px; left: 8px; animation: lookAround 11s infinite; }
+        .pupil::after { content: ''; position: absolute; top: 4px; left: 4px; width: 8px; height: 8px; background: white; border-radius: 50%; }
+
+        .mouth { position: absolute; bottom: 5px; left: 50%; width: 36px; height: 12px; border-bottom: 6px solid #0f2027; border-radius: 0 0 40px 40px; transform: translateX(-50%); transition: all 0.7s; }
         .inhale .mouth { width: 26px; height: 2px; border-bottom: 4px solid #0f2027; border-radius: 0; bottom: 10px; }
         .exhale .mouth { width: 24px; height: 24px; border: 6px solid #0f2027; border-radius: 50%; background: #0a1a3a; bottom: -8px; }
 
-        /* ЦВЕТНИ СЪСТОЯНИЯ */
+        /* Състояния */
         .warning #blob { background: linear-gradient(135deg, #ffd319 0%, #ff901f 100%); box-shadow: 0 0 100px rgba(255, 211, 25, 0.5); }
         .danger #blob { background: linear-gradient(135deg, #ff0844 0%, #ffb199 100%); animation: shake 0.2s infinite; box-shadow: 0 0 100px rgba(255, 8, 68, 0.6); }
         .meditation .eyes { opacity: 0.15; }
 
         #status-msg { margin-top: 55px; font-size: 32px; font-weight: bold; text-align: center; min-height: 90px; text-shadow: 0 5px 15px rgba(0,0,0,0.5); }
 
-        /* ПОЗИЦИОНИРАНЕ В ЪГЛИТЕ */
-        #yoga-btn { 
-            position: fixed; bottom: 45px; left: 45px; 
-            padding: 22px 45px; font-size: 20px; border-radius: 60px; 
-            background: #ffd319; color: #5c4b00; border: none; cursor: pointer;
-            font-weight: bold; box-shadow: 0 10px 25px rgba(0,0,0,0.3); transition: 0.3s;
-            display: none;
-        }
-        #yoga-btn:hover { transform: translateY(-5px) scale(1.05); }
+        /* Контролен панел долу */
+        #bottom-controls { position: fixed; bottom: 35px; display: none; gap: 20px; z-index: 100; }
+        .action-btn { padding: 18px 35px; font-size: 18px; border-radius: 50px; border: none; cursor: pointer; font-weight: bold; box-shadow: 0 10px 20px rgba(0,0,0,0.3); transition: 0.3s; }
+        .action-btn:hover { transform: translateY(-3px) scale(1.05); }
+        #yoga-btn { background: #ffd319; color: #5c4b00; }
+        #pause-btn { background: #9b59b6; color: white; }
+        #stop-btn { background: #e74c3c; color: white; }
 
-        #author-tag { 
-            position: fixed; bottom: 35px; right: 45px; 
-            font-size: 16px; opacity: 0.8; font-style: italic;
-            background: rgba(255,255,255,0.08); padding: 12px 24px; border-radius: 18px;
-            border: 1px solid rgba(255,255,255,0.1);
+        /* ДИСКРЕТЕН БУТОН ЗА ИСТОРИЯ (Долу вляво) */
+        #history-btn {
+            position: fixed; bottom: 10px; left: 10px;
+            background: rgba(255, 255, 255, 0.15); color: white; border: 1px solid rgba(255,255,255,0.3);
+            padding: 15px 20px; border-radius: 15px; font-size: 16px; font-weight: bold;
+            cursor: pointer; z-index: 500; opacity: 0; transition: opacity 0.4s; display: none;
         }
+        #history-btn:hover { opacity: 1; } /* Показва се само при минаване с мишката */
+
+        /* Екрани (Модали) */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5,5,16,0.98); z-index: 2000; display: none; flex-direction: column; justify-content: center; align-items: center; overflow-y: auto; }
+        .stats-box { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); padding: 50px; border-radius: 30px; border: 3px solid #4facfe; box-shadow: 0 0 50px rgba(79,172,254,0.4); text-align: center; width: 80%; max-width: 600px; margin: 20px 0; }
+        .stats-box h2 { color: #ffd319; font-size: 2.5em; margin-top: 0; }
+        .stat-row { display: flex; justify-content: space-between; font-size: 22px; margin: 20px 0; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+        .stat-value { font-weight: bold; color: #4facfe; }
+        .motivational-msg { margin-top: 30px; font-size: 45px; font-weight: bold; color: #ffd319; text-shadow: 0 4px 10px rgba(0,0,0,0.6); line-height: 1.3; }
+        
+        /* Специфично за историята */
+        .history-card { background: rgba(0,0,0,0.3); border-radius: 15px; padding: 15px; margin-bottom: 20px; text-align: left; border: 1px solid rgba(255,255,255,0.1); }
+        .history-card h3 { margin: 0 0 10px 0; color: #4facfe; }
 
         @keyframes morph { 0%, 100% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; } 50% { border-radius: 60% 40% 50% 60% / 55% 65% 45% 55%; } }
         @keyframes blink { 0%, 94%, 98%, 100% { transform: scaleY(1); } 96% { transform: scaleY(0.05); } }
@@ -144,46 +171,111 @@
     <div id="overlay">
         <div id="intro-card">
             <h1>✨ Вълшебният Пазител</h1>
-            <p style="font-size: 1.2em;">Добре дошли в света на тишината! Пазителят обича спокойните деца.</p>
+            <p style="font-size: 1.2em;">Добре дошли в света на тишината!</p>
             
+            <input type="text" id="class-input" placeholder="Кой клас сте? (напр. 3-ти А)" autocomplete="off">
+
             <div class="mood-box">
                 <div class="mood" style="border-color: #4facfe; box-shadow: 0 0 15px rgba(79,172,254,0.3);">
-                    <strong style="color: #4facfe;">СИН</strong><br>Щастлив е и наблюдава в тишината.
+                    <strong style="color: #4facfe;">СИН</strong><br>Щастлив е и наблюдава. Носи ви звездички!
                 </div>
                 <div class="mood" style="border-color: #ffd319; box-shadow: 0 0 15px rgba(255,211,25,0.3);">
-                    <strong style="color: #ffd319;">ЖЪЛТ</strong><br>Усеща шум и започва да се сърди.
+                    <strong style="color: #ffd319;">ЖЪЛТ</strong><br>Усеща шум. Пазителят губи търпение.
                 </div>
                 <div class="mood" style="border-color: #ff0844; box-shadow: 0 0 15px rgba(255,8,68,0.3);">
-                    <strong style="color: #ff0844;">ЧЕРВЕН</strong><br>Магията се разваля! Трябва спокойствие и тишина.
+                    <strong style="color: #ff0844;">ЧЕРВЕН</strong><br>Магията се разваля от силен шум!
                 </div>
             </div>
-
-            <p style="opacity: 0.9; margin-bottom: 25px;">Използвайте <strong>"Време за Йога"</strong> за 3 вълшебни дишания.</p>
             
             <button style="background: #4facfe; color: white; padding: 20px 60px; font-size: 24px; border-radius: 60px; border: none; cursor: pointer; font-weight: bold; box-shadow: 0 10px 20px rgba(0,0,0,0.3);" onclick="initApp()">СЪБУДИ МАГИЯТА</button>
+            <div class="intro-author">Създадено от: Дочка Кючукова</div>
         </div>
+    </div>
+
+    <div id="top-bar">
+        <div id="class-display-name"></div>
+        <div id="stars-container"></div>
     </div>
 
     <div id="breathing-track"><div id="breathing-fill"></div></div>
 
+    <div id="sensitivity-control">
+        <div id="anger-tracker">
+            😡 ГНЯВ
+            <span id="anger-display">0</span>
+        </div>
+
+        <span class="slider-label">ГРАНИЦА<br>НА ШУМА</span>
+        <input type="range" id="sensitivity-slider" min="5" max="80" value="25">
+        <span class="slider-label" id="threshold-val" style="font-size: 35px;">25</span>
+        
+        <span class="slider-label mic-label">МИКРОФОН</span>
+        <span id="current-vol">0</span>
+    </div>
+
     <div id="main-stage">
-    <div id="hero-wrap"> <div id="blob">
-            <div class="arm arm-left"></div>
-            <div class="arm arm-right"></div>
-            <div class="face">
-                <div class="eyes">
-                    <div class="eye"><div class="pupil"></div></div>
-                    <div class="eye"><div class="pupil"></div></div>
+        <div id="hero-wrap"> 
+            <div id="blob">
+                <div class="headphones">
+                    <div class="headband"></div>
+                    <div class="earmuff left"></div>
+                    <div class="earmuff right"></div>
                 </div>
-                <div class="mouth"></div>
+                
+                <div class="arm arm-left"></div>
+                <div class="arm arm-right"></div>
+                <div class="face">
+                    <div class="eyes">
+                        <div class="eye"><div class="pupil"></div></div>
+                        <div class="eye"><div class="pupil"></div></div>
+                    </div>
+                    <div class="mouth"></div>
+                </div>
             </div>
         </div>
+        <div id="status-msg">Пазителят очаква вашата тишина...</div>
     </div>
-    <div id="status-msg">Пазителят очаква вашата тишина...</div>
-</div>
 
-    <button id="yoga-btn">🧘 ВРЕМЕ ЗА ЙОГА</button>
-    <div id="author-tag">Създадено от: Дочка Кючукова</div>
+    <div id="bottom-controls">
+        <button id="yoga-btn" class="action-btn">🧘 ЙОГА</button>
+        <button id="pause-btn" class="action-btn">⏸️ ПАУЗА</button>
+        <button id="stop-btn" class="action-btn">⏹️ КРАЙ НА ЧАСА</button>
+    </div>
+
+    <button id="history-btn" onclick="showHistory()">📊 Отчети на класа</button>
+
+    <div id="stats-modal" class="modal">
+        <div class="stats-box">
+            <h2>🏆 Отчет на Пазителя</h2>
+            <div class="stat-row">Клас: <span class="stat-value" id="stat-class"></span></div>
+            <div class="stat-row">Спечелени звезди: <span class="stat-value" id="stat-stars"></span></div>
+            <div class="stat-row">Време в тишина: <span class="stat-value" id="stat-silence"></span></div>
+            <div class="stat-row">Време в шум: <span class="stat-value" id="stat-noise"></span></div>
+            <div class="stat-row">Разгневявания (Гняв): <span class="stat-value" id="stat-anger"></span></div>
+            <div class="motivational-msg" id="stat-msg"></div>
+            <br>
+            <button class="action-btn" style="background: #4facfe; color: white;" onclick="location.reload()">НОВА СЕСИЯ</button>
+        </div>
+    </div>
+
+    <div id="history-modal" class="modal">
+        <div class="stats-box">
+            <h2>📊 История за: <span id="history-class-name"></span></h2>
+            
+            <div class="history-card">
+                <h3>🏆 Най-добро постижение (Най-много звезди)</h3>
+                <div id="best-record">Няма данни.</div>
+            </div>
+
+            <div class="history-card" style="border-color: rgba(255,8,68,0.5);">
+                <h3 style="color: #ff0844;">⚠️ Най-шумен час (Най-много гняв)</h3>
+                <div id="worst-record">Няма данни.</div>
+            </div>
+
+            <br>
+            <button class="action-btn" style="background: #9b59b6; color: white;" onclick="document.getElementById('history-modal').style.display='none'">ЗАТВОРИ</button>
+        </div>
+    </div>
 
     <audio id="music" loop src="fish_music.mp3"></audio>
 
@@ -192,17 +284,57 @@
     const stage = document.getElementById('main-stage');
     const msg = document.getElementById('status-msg');
     const music = document.getElementById('music');
+    
+    // Елементи
     const yogaBtn = document.getElementById('yoga-btn');
-    const breathFill = document.getElementById('breathing-fill');
-    const breathTrack = document.getElementById('breathing-track');
-
+    const pauseBtn = document.getElementById('pause-btn');
+    const stopBtn = document.getElementById('stop-btn');
+    const bottomControls = document.getElementById('bottom-controls');
+    const topBar = document.getElementById('top-bar');
+    const starsContainer = document.getElementById('stars-container');
+    const classNameDisplay = document.getElementById('class-display-name');
+    
+    const sensitivitySlider = document.getElementById('sensitivity-slider');
+    const thresholdVal = document.getElementById('threshold-val');
+    const currentVolDisplay = document.getElementById('current-vol');
+    const angerDisplay = document.getElementById('anger-display');
+    const historyBtn = document.getElementById('history-btn');
+    
+    // Променливи
     let audioCtx, analyser, dataArray;
-    let noiseScore = 0, isYogaMode = false, yogaCycles = 0, isDeepMeditation = false;
+    let sensitivityThreshold = 25; 
+    let noiseScore = 0;
+    
+    let isYogaMode = false, yogaCycles = 0, isDeepMeditation = false;
+    let isPaused = false, isSessionActive = false;
+    let angerCount = 0, wasAngry = false;
+    
+    let silenceSeconds = 0, noiseSeconds = 0, continuousSilenceSeconds = 0;
+    const SECONDS_FOR_STAR = 300; // 5 минути
+    let earnedStars = 0;
+    let currentClassName = "";
+
+    // Обновяване на плъзгача
+    sensitivitySlider.oninput = function() {
+        sensitivityThreshold = parseInt(this.value);
+        thresholdVal.textContent = sensitivityThreshold;
+    }
 
     async function initApp() {
+        const classInput = document.getElementById('class-input').value.trim();
+        currentClassName = classInput ? classInput : "Тайният Клас";
+        classNameDisplay.textContent = currentClassName;
+
         document.getElementById('overlay').style.opacity = '0';
         setTimeout(() => document.getElementById('overlay').style.display = 'none', 500);
-        yogaBtn.style.display = 'block';
+        
+        bottomControls.style.display = 'flex';
+        topBar.style.display = 'flex';
+        document.getElementById('sensitivity-control').style.display = 'flex';
+        historyBtn.style.display = 'block'; // Показваме го (невидимо, чака мишката)
+
+        isSessionActive = true;
+        startTimers();
 
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -211,78 +343,223 @@
             audioCtx.createMediaStreamSource(stream).connect(analyser);
             dataArray = new Uint8Array(analyser.frequencyBinCount);
             loop();
-        } catch(e) { alert("Моля, разрешете достъп до микрофона!"); }
+        } catch(e) { 
+            alert("Моля, разрешете достъп до микрофона горе в браузъра!"); 
+        }
     }
 
     function loop() {
-        if (!isYogaMode) {
+        if (!isSessionActive) return;
+
+        if (!isYogaMode && !isPaused) {
             analyser.getByteFrequencyData(dataArray);
             let vol = dataArray.reduce((a,b) => a+b) / dataArray.length;
-            if (vol > 35) noiseScore += (vol - 35) * 0.2;
-            else if (noiseScore > 0) noiseScore -= 0.6;
+            
+            currentVolDisplay.textContent = Math.round(vol);
+
+            if (vol > sensitivityThreshold) {
+                let impact = (vol - sensitivityThreshold) * 0.2; 
+                if (impact > 4) impact = 4; 
+                noiseScore += impact;
+            } else if (noiseScore > 0) {
+                noiseScore -= 0.3; 
+            }
 
             if (noiseScore > 100) { 
-                stage.className = 'danger'; msg.textContent = "ШШШТ! МАГИЯТА ИЗЧЕЗВА!";
-            } else if (noiseScore > 35) { 
-                stage.className = 'warning'; msg.textContent = "Пазителят се дразни от шума... Да го успокоим с пълна тишина.";
+                stage.className = 'danger';
+                msg.textContent = "ШШШТ! МАГИЯТА ИЗЧЕЗВА!";
+                if (!wasAngry) { 
+                    angerCount++; 
+                    wasAngry = true; 
+                    angerDisplay.textContent = angerCount; // Обновява брояча на екрана
+                }
+            } else if (noiseScore > 40) { 
+                stage.className = 'warning';
+                msg.textContent = "Пазителят се дразни от шума...";
+                wasAngry = false;
             } else {
-                stage.className = ''; msg.textContent = "Прекрасна тишина...";
+                stage.className = '';
+                msg.textContent = "Прекрасна тишина...";
+                wasAngry = false;
             }
-        } else if (isDeepMeditation) {
+        } else if (isYogaMode && isDeepMeditation) {
             if (music.volume > 0.02) music.volume -= 0.005;
-            else { music.pause(); isYogaMode = false; yogaBtn.textContent = "🧘 ВРЕМЕ ЗА ЙОГА"; }
+            else { music.pause(); isYogaMode = false; yogaBtn.textContent = "🧘 ЙОГА"; }
         }
+        
         requestAnimationFrame(loop);
     }
 
+    function startTimers() {
+        setInterval(() => {
+            if (!isSessionActive || isPaused || isYogaMode) return;
+            if (stage.className === 'danger' || stage.className === 'warning') {
+                noiseSeconds++;
+                continuousSilenceSeconds = 0; 
+            } else {
+                silenceSeconds++;
+                continuousSilenceSeconds++;
+                if (continuousSilenceSeconds >= SECONDS_FOR_STAR) {
+                    addStar();
+                    continuousSilenceSeconds = 0;
+                }
+            }
+        }, 1000);
+    }
+
+    function addStar() {
+        earnedStars++;
+        starsContainer.innerHTML += "⭐";
+    }
+
+    function formatTime(totalSeconds) {
+        const m = Math.floor(totalSeconds / 60);
+        const s = totalSeconds % 60;
+        return `${m} мин. и ${s} сек.`;
+    }
+
+    pauseBtn.onclick = function() {
+        if (isYogaMode) return; 
+        isPaused = !isPaused;
+        if (isPaused) {
+            stage.classList.add('paused');
+            msg.textContent = "Слушаме госпожата! (Пауза)";
+            pauseBtn.textContent = "▶️ ПУСНИ";
+            pauseBtn.style.background = "#2ecc71";
+            noiseScore = 0; 
+        } else {
+            stage.classList.remove('paused');
+            msg.textContent = "Пазителят отново слуша...";
+            pauseBtn.textContent = "⏸️ ПАУЗА";
+            pauseBtn.style.background = "#9b59b6";
+        }
+    };
+
+    stopBtn.onclick = function() {
+        isSessionActive = false; 
+        if (audioCtx) audioCtx.suspend();
+        
+        document.getElementById('main-stage').style.display = 'none';
+        bottomControls.style.display = 'none';
+        topBar.style.display = 'none';
+        document.getElementById('sensitivity-control').style.display = 'none';
+        historyBtn.style.display = 'none';
+        
+        // 1. ЗАПАЗВАНЕ В ИСТОРИЯТА
+        saveToHistory();
+
+        // 2. ПОКАЗВАНЕ НА ОТЧЕТА
+        document.getElementById('stat-class').textContent = currentClassName;
+        document.getElementById('stat-stars').textContent = earnedStars > 0 ? "⭐".repeat(earnedStars) : "Няма (Опитайте пак утре!)";
+        document.getElementById('stat-silence').textContent = formatTime(silenceSeconds);
+        document.getElementById('stat-noise').textContent = formatTime(noiseSeconds);
+        document.getElementById('stat-anger').textContent = angerCount;
+        
+       let msgEl = document.getElementById('stat-msg');
+        
+        // Изчисляваме процента на тишина
+        let totalTime = silenceSeconds + noiseSeconds;
+        let silencePercentage = totalTime > 0 ? (silenceSeconds / totalTime) * 100 : 0;
+
+        if (angerCount <= 3 && silencePercentage >= 70) {
+            // ПЪРВИ ПОЗДРАВ: До 3 вбесявания и над 70% тишина
+            msgEl.textContent = "БЛАГОДАРЯ ВИ, ЧЕ МЕ ПАЗИХТЕ! ЧУВСТВАМ СЕ ПРЕКРАСНО!";
+        } else if (angerCount <= 5) {
+            // ВТОРИ ПОЗДРАВ: До 5 вбесявания
+            msgEl.textContent = "БЯХТЕ ДОБРИ, НО НА МОМЕНТИ МЕ ЗАБОЛЯВАШЕ. УТРЕ ЩЕ МЕ ПАЗИТЕ ПОВЕЧЕ, НАЛИ?";
+        } else {
+            // ТРЕТИ ПОЗДРАВ: Над 5 вбесявания
+            msgEl.textContent = "ДНЕС МИ БЕШЕ МНОГО ШУМНО И СТРАДАХ. МОЛЯ ВИ, БЪДЕТЕ ПО-ВНИМАТЕЛНИ С МЕН УТРЕ!";
+        }
+
+        document.getElementById('stats-modal').style.display = 'flex';
+    };
+
+    // --- ЛОГИКА ЗА ИСТОРИЯТА (Запазване и Показване) ---
+    function saveToHistory() {
+        let allStats = JSON.parse(localStorage.getItem('guardian_history') || '{}');
+        if (!allStats[currentClassName]) allStats[currentClassName] = [];
+        
+        allStats[currentClassName].push({
+            date: new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString(),
+            stars: earnedStars,
+            silence: silenceSeconds,
+            anger: angerCount
+        });
+        
+        localStorage.setItem('guardian_history', JSON.stringify(allStats));
+    }
+
+    function showHistory() {
+        document.getElementById('history-class-name').textContent = currentClassName;
+        let allStats = JSON.parse(localStorage.getItem('guardian_history') || '{}');
+        let classData = allStats[currentClassName];
+
+        let bestBox = document.getElementById('best-record');
+        let worstBox = document.getElementById('worst-record');
+
+        if (!classData || classData.length === 0) {
+            bestBox.innerHTML = "Все още няма записани часове за този клас.";
+            worstBox.innerHTML = "Все още няма записани часове за този клас.";
+        } else {
+            // Намиране на най-добър (най-много звезди, при равни - най-малко гняв)
+            let best = classData.reduce((prev, current) => {
+                if (current.stars > prev.stars) return current;
+                if (current.stars === prev.stars && current.anger < prev.anger) return current;
+                return prev;
+            });
+
+            // Намиране на най-лош (най-много гняв)
+            let worst = classData.reduce((prev, current) => (prev.anger > current.anger) ? prev : current);
+
+            bestBox.innerHTML = `Дата: <b>${best.date}</b><br>Звезди: ${"⭐".repeat(best.stars) || "0"}<br>Гняв: ${best.anger} пъти<br>Тишина: ${formatTime(best.silence)}`;
+            worstBox.innerHTML = `Дата: <b>${worst.date}</b><br>Гняв: <b>${worst.anger} пъти</b><br>Звезди: ${"⭐".repeat(worst.stars) || "0"}`;
+        }
+
+        document.getElementById('history-modal').style.display = 'flex';
+    }
+
+    // --- ЙОГА ---
+    const breathFill = document.getElementById('breathing-fill');
+    const breathTrack = document.getElementById('breathing-track');
+    
     yogaBtn.onclick = function() {
-        if (isDeepMeditation) return;
+        if (isDeepMeditation || isPaused) return;
         if (!isYogaMode) {
             isYogaMode = true; yogaCycles = 0; isDeepMeditation = false; noiseScore = 0;
             music.volume = 1; music.play();
             stage.classList.add('yoga-active');
             breathTrack.style.opacity = '1';
-            yogaBtn.textContent = "🛑 СТОП";
+            yogaBtn.textContent = "🛑 СТОП ЙОГА";
             runYogaCycle();
         } else {
             isYogaMode = false; music.pause(); stage.className = '';
             breathTrack.style.opacity = '0';
-            yogaBtn.textContent = "🧘 ВРЕМЕ ЗА ЙОГА";
+            yogaBtn.textContent = "🧘 ЙОГА";
         }
     };
 
-   function runYogaCycle() {
-    if (!isYogaMode || isDeepMeditation) return;
-    yogaCycles++;
-
-    if (yogaCycles > 3) {
-        isDeepMeditation = true;
-        stage.className = 'meditation';
-        document.getElementById('hero-wrap').style.transform = "translateY(0) scale(1)";
-        breathTrack.style.opacity = '0';
-        msg.innerHTML = "✨ Вълшебна тишина... ✨";
-        return;
-    }
-
-    const wrap = document.getElementById('hero-wrap');
-    
-    // ВДИШАЙ - Героят се надува и отива нагоре
-    msg.innerHTML = "Вдишай през носа... (" + yogaCycles + "/3)";
-    stage.classList.remove('exhale'); stage.classList.add('inhale');
-    wrap.style.transform = "translateY(-140px) scale(1.25)"; 
-    breathFill.style.height = "100%";
-
-    setTimeout(() => {
+    function runYogaCycle() {
         if (!isYogaMode || isDeepMeditation) return;
-        // ИЗДИШАЙ - Героят се свива и слиза надолу
-        msg.innerHTML = "Издишай през устата... (" + yogaCycles + "/3)";
-        stage.classList.remove('inhale'); stage.classList.add('exhale');
-        wrap.style.transform = "translateY(80px) scale(0.9)"; 
-        breathFill.style.height = "0%";
-    }, 6000);
-
-    setTimeout(runYogaCycle, 12500);
-}
+        yogaCycles++;
+        if (yogaCycles > 3) {
+            isDeepMeditation = true; stage.className = 'meditation';
+            document.getElementById('hero-wrap').style.transform = "translateY(0) scale(1)";
+            breathTrack.style.opacity = '0'; msg.innerHTML = "✨ Вълшебна тишина... ✨";
+            return;
+        }
+        const wrap = document.getElementById('hero-wrap');
+        msg.innerHTML = "Вдишай през носа... (" + yogaCycles + "/3)";
+        stage.classList.remove('exhale'); stage.classList.add('inhale');
+        wrap.style.transform = "translateY(-140px) scale(1.25)"; breathFill.style.height = "100%";
+        setTimeout(() => {
+            if (!isYogaMode || isDeepMeditation) return;
+            msg.innerHTML = "Издишай през устата... (" + yogaCycles + "/3)";
+            stage.classList.remove('inhale'); stage.classList.add('exhale');
+            wrap.style.transform = "translateY(80px) scale(0.9)"; breathFill.style.height = "0%";
+        }, 6000);
+        setTimeout(runYogaCycle, 12500);
+    }
 </script>
 </body>
 </html>
